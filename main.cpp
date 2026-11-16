@@ -83,3 +83,32 @@ int randomNo(int min, int max)
     return rand() % (max - min + 1) + min;
 }
 
+bool startLevel1(uint16_t &levelScore)
+{
+    cout << "Starting Level 1..." << endl;
+    // Level 1 logic here
+    // For demonstration, we will just simulate a successful level completion
+    levelScore = randomNo(1, 10); // Random score for level 1
+    cout << "Level 1 completed with score: " << levelScore << endl;
+    return true; // Indicate level completion
+}
+
+bool startLevel2(uint16_t &levelScore)
+{
+    cout << "Starting Level 2..." << endl;
+    // Level 2 logic here
+    // For demonstration, we will just simulate a successful level completion
+    levelScore = randomNo(1, 10); // Random score for level 2
+    cout << "Level 2 completed with score: " << levelScore << endl;
+    return true; // Indicate level completion
+}
+
+bool startLevel3(uint16_t &levelScore)
+{
+    cout << "Starting Level 3..." << endl;
+    // Level 3 logic here
+    // For demonstration, we will just simulate a successful level completion
+    levelScore = randomNo(1, 10); // Random score for level 3
+    cout << "Level 3 completed with score: " << levelScore << endl;
+    return true; // Indicate level completion
+}
