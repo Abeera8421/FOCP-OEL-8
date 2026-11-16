@@ -86,6 +86,8 @@ int randomNo(int min, int max)
 bool startLevel1(uint16_t &levelScore)
 {
     cout << "Starting Level 1..." << endl;
+    uint8_t randomWord = randomNo(1, 10); // Random word selection between 1 and 10
+    uint8_t randomShift = randomNo(1, 25); // Random shift between 1 and 25
     // Level 1 logic here
     // For demonstration, we will just simulate a successful level completion
     levelScore = randomNo(1, 10); // Random score for level 1
