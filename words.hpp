@@ -11,8 +11,7 @@ extern const std::string words1[10] = {
     "grape",
     "honeydew",
     "kiwi",
-    "lemon"
-};
+    "lemon"};
 
 extern const std::string words2[10] = {
     "avocado",
@@ -24,8 +23,7 @@ extern const std::string words2[10] = {
     "grapefruit",
     "huckleberry",
     "jackfruit",
-    "kumquat"
-};
+    "kumquat"};
 
 extern const std::string words3[10] = {
     "acai",
@@ -37,5 +35,16 @@ extern const std::string words3[10] = {
     "gooseberry",
     "honeycrisp",
     "imbe",
-    "jabuticaba"
-};
+    "jabuticaba"};
+
+extern const std::string keys[10] = {
+    "code",
+    "nope",
+    "hope",
+    "love",
+    "life",
+    "light",
+    "link",
+    "list",
+    "live",
+    "baig"};

@@ -198,8 +198,8 @@ bool startLevel2(uint16_t &levelScore)
     const int wordLength = randomWord.length();
     vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
     createDashes(randomWord, dashes);
-    string shiftedWord = randomWord;       // Create a copy of the random word to shift
-    encrypt2(shiftedWord);      // Create a copy of the random word to shift
+    string shiftedWord = randomWord;                // Create a copy of the random word to shift
+    encrypt2(shiftedWord);                          // Create a copy of the random word to shift
     printLevel(randomWord, dashes, shiftedWord, 2); // Print the initial state of the level
     while (input != randomWord && attempts < 5)     // Allow up to 3 attempts
     {
@@ -228,9 +228,35 @@ bool startLevel2(uint16_t &levelScore)
 bool startLevel3(uint16_t &levelScore)
 {
     cout << "Starting Level 3..." << endl;
-    // Level 3 logic here
-    // For demonstration, we will just simulate a successful level completion
-    levelScore = randomNo(1, 10); // Random score for level 3
+    string input = "";
+    size_t attempts = 0;                               // Initialize attempts to 0
+    const string &randomWord = words3[randomNo(0, 9)]; // Random word selection from words3
+    const int wordLength = randomWord.length();
+    vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
+    createDashes(randomWord, dashes);
+    string shiftedWord = randomWord;                // Create a copy of the random word to shift
+    encrypt2(shiftedWord);                          // Create a copy of the random word to shift
+    printLevel(randomWord, dashes, shiftedWord, 3); // Print the initial state of the level
+    while (input != randomWord && attempts < 5)     // Allow up to 3 attempts
+    {
+        takeStringInput(input);
+        if (!validateInput(input))
+        {
+            cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
+            continue; // Skip the rest of the loop and prompt for input again
+        }
+        if (input == randomWord)
+        {
+            cout << "Congratulations! You've guessed the word correctly." << endl;
+            break; // Exit the loop if the word is guessed correctly
+        }
+        else
+        {
+            cout << "Incorrect guess. Try again." << endl;
+            attempts++; // Increment attempts for incorrect guesses
+        }
+    }
+    levelScore += 5; // Random score for level 3
     cout << "Level 3 completed with score: " << levelScore << endl;
     return true; // Indicate level completion
 }
