@@ -94,7 +94,7 @@ int randomNo(int min, int max)
 void createDashes(const string &word, vector<bool> &dashes)
 {
     uint16_t wordLength = word.length();
-    for (size_t i = 0; i < wordLength; ++i)
+    for (size_t i = 0; i <= wordLength; ++i)
     {
         dashes[i] = false; // Initialize all dashes to false (hidden)
     }
@@ -167,9 +167,6 @@ bool startLevel1(uint16_t &levelScore)
             cout << "Incorrect guess. Try again." << endl;
             attempts++; // Increment attempts for incorrect guesses
         }
-    }
-    {
-        
     }
     levelScore = randomNo(1, 10); // Random score for level 1
     cout << "Level 1 completed with score: " << levelScore << endl;
