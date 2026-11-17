@@ -7,6 +7,8 @@
 #include <cstdint>
 #include "words.hpp"
 
+#define EOF = -1;
+
 using namespace std;
 // Function prototypes
 char shiftChar(char c, int shift);
@@ -14,6 +16,7 @@ int randomNo(int min, int max);
 bool validateInput(const string &input);
 void createDashes(const string &word, vector<bool> &dashes);
 void printLevel(const string &word, const vector<bool> &dashes, const string &shiftedWord, uint16_t level);
+void takeStringInput(string &input);
 bool startLevel1(uint16_t &levelScore);
 bool startLevel2(uint16_t &levelScore);
 bool startLevel3(uint16_t &levelScore);
@@ -123,10 +126,17 @@ void printLevel(const string &word, const vector<bool> &dashes, const string &sh
     cout << endl; // New line after printing the level
 }
 
+void takeStringInput(string &input)
+{
+    cout << "Enter a string: ";
+    cin.clear();
+    getline(cin, input);
+}
+
 bool startLevel1(uint16_t &levelScore)
 {
+    string input = EOF;
     size_t attempts = 0; // Initialize attempts to 0
-    cout << "Starting Level 1..." << endl;
     const string &randomWord = words1[randomNo(0, 9)]; // Random word selection from words1
     const int wordLength = randomWord.length();
     vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
@@ -137,8 +147,31 @@ bool startLevel1(uint16_t &levelScore)
     {
         c = shiftChar(c, randomShift); // Shift each character in the word
     }
+    cout << "Starting Level 1..." << endl;
     printLevel(randomWord, dashes, shiftedWord, 1); // Print the initial state of the level
-    levelScore = randomNo(1, 10);                   // Random score for level 1
+    while (input != randomWord && attempts < 5) // Allow up to 3 attempts
+    {
+        takeStringInput(input);
+        if (!validateInput(input))
+        {
+            cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
+            continue; // Skip the rest of the loop and prompt for input again
+        }
+        if (input == randomWord)
+        {
+            cout << "Congratulations! You've guessed the word correctly." << endl;
+            break; // Exit the loop if the word is guessed correctly
+        }
+        else
+        {
+            cout << "Incorrect guess. Try again." << endl;
+            attempts++; // Increment attempts for incorrect guesses
+        }
+    }
+    {
+        
+    }
+    levelScore = randomNo(1, 10); // Random score for level 1
     cout << "Level 1 completed with score: " << levelScore << endl;
     return true; // Indicate level completion
 }
