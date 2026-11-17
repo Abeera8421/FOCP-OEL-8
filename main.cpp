@@ -7,8 +7,6 @@
 #include <cstdint>
 #include "words.hpp"
 
-#define EOF = -1;
-
 using namespace std;
 // Function prototypes
 char shiftChar(char c, int shift);
@@ -17,6 +15,7 @@ bool validateInput(const string &input);
 void createDashes(const string &word, vector<bool> &dashes);
 void printLevel(const string &word, const vector<bool> &dashes, const string &shiftedWord, uint16_t level);
 void takeStringInput(string &input);
+void encrypt2(string input);
 bool startLevel1(uint16_t &levelScore);
 bool startLevel2(uint16_t &levelScore);
 bool startLevel3(uint16_t &levelScore);
@@ -94,12 +93,12 @@ int randomNo(int min, int max)
 void createDashes(const string &word, vector<bool> &dashes)
 {
     uint16_t wordLength = word.length();
-    for (size_t i = 0; i <= wordLength; ++i)
+    for (size_t i = 0; i < wordLength; ++i)
     {
         dashes[i] = false; // Initialize all dashes to false (hidden)
     }
     uint16_t numDashesIndexes = wordLength / 2; // Number of dashes to create (half the word length)
-    for (size_t i = 0; i < numDashesIndexes; i += 2)
+    for (size_t i = 0; i <= numDashesIndexes; i += 2)
     {
         dashes[i] = true; // Set the alternate indexes to true (hidden)
     }
@@ -133,10 +132,27 @@ void takeStringInput(string &input)
     getline(cin, input);
 }
 
+void encrypt2(string input)
+{
+    uint8_t randomShiftEven = randomNo(1, 25); // Random shift for even indexed characters
+    uint8_t randomShiftOdd = randomNo(1, 25);  // Random shift for odd indexed characters
+    for (size_t i = 0; i < input.length(); ++i)
+    {
+        if (i % 2 == 0)
+        {
+            input[i] = shiftChar(input[i], randomShiftEven); // Shift even indexed characters
+        }
+        else
+        {
+            input[i] = shiftChar(input[i], randomShiftOdd); // Shift odd indexed characters
+        }
+    }
+}
+
 bool startLevel1(uint16_t &levelScore)
 {
-    string input = EOF;
-    size_t attempts = 0; // Initialize attempts to 0
+    string input = "";
+    size_t attempts = 0;                               // Initialize attempts to 0
     const string &randomWord = words1[randomNo(0, 9)]; // Random word selection from words1
     const int wordLength = randomWord.length();
     vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
@@ -149,7 +165,7 @@ bool startLevel1(uint16_t &levelScore)
     }
     cout << "Starting Level 1..." << endl;
     printLevel(randomWord, dashes, shiftedWord, 1); // Print the initial state of the level
-    while (input != randomWord && attempts < 5) // Allow up to 3 attempts
+    while (input != randomWord && attempts < 5)     // Allow up to 3 attempts
     {
         takeStringInput(input);
         if (!validateInput(input))
@@ -168,7 +184,7 @@ bool startLevel1(uint16_t &levelScore)
             attempts++; // Increment attempts for incorrect guesses
         }
     }
-    levelScore = randomNo(1, 10); // Random score for level 1
+    levelScore += 3; // Random score for level 1
     cout << "Level 1 completed with score: " << levelScore << endl;
     return true; // Indicate level completion
 }
@@ -176,9 +192,35 @@ bool startLevel1(uint16_t &levelScore)
 bool startLevel2(uint16_t &levelScore)
 {
     cout << "Starting Level 2..." << endl;
-    // Level 2 logic here
-    // For demonstration, we will just simulate a successful level completion
-    levelScore = randomNo(1, 10); // Random score for level 2
+    string input = "";
+    size_t attempts = 0;                               // Initialize attempts to 0
+    const string &randomWord = words2[randomNo(0, 9)]; // Random word selection from words2
+    const int wordLength = randomWord.length();
+    vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
+    createDashes(randomWord, dashes);
+    string shiftedWord = randomWord;       // Create a copy of the random word to shift
+    encrypt2(shiftedWord);      // Create a copy of the random word to shift
+    printLevel(randomWord, dashes, shiftedWord, 2); // Print the initial state of the level
+    while (input != randomWord && attempts < 5)     // Allow up to 3 attempts
+    {
+        takeStringInput(input);
+        if (!validateInput(input))
+        {
+            cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
+            continue; // Skip the rest of the loop and prompt for input again
+        }
+        if (input == randomWord)
+        {
+            cout << "Congratulations! You've guessed the word correctly." << endl;
+            break; // Exit the loop if the word is guessed correctly
+        }
+        else
+        {
+            cout << "Incorrect guess. Try again." << endl;
+            attempts++; // Increment attempts for incorrect guesses
+        }
+    }
+    levelScore += 4; // Random score for level 2
     cout << "Level 2 completed with score: " << levelScore << endl;
     return true; // Indicate level completion
 }
