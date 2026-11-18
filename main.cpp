@@ -11,6 +11,7 @@ using namespace std;
 char shiftChar(char c, int shift);
 int randomNo(int min, int max);
 bool validateInput(const string &input);
+void getOmittedIndexes(const string &word, int omitted[]);
 void createDashes(const string &word, string &dashes);
 void printLevel(const string &word, const string &dashes, const string &shiftedWord, uint16_t level);
 void takeStringInput(string &input);
@@ -97,14 +98,55 @@ int randomNo(int min, int max)
     return rand() % (max - min + 1) + min;
 }
 
+// Fills omitted[] randomly with 1 (omit letter) or 0 (keep letter)
+// Guarantees at least 1 letter is omitted and at least 2 letters stay visible
+void getOmittedIndexes(const string &word, int omitted[])
+{
+    int wordLength = word.length();
+    int omittedCount = 0;
+
+    // Step A: Randomly assign 0 (keep) or 1 (omit) for every letter
+    for (int i = 0; i < wordLength; ++i)
+    {
+        omitted[i] = randomNo(0, 1);
+        if (omitted[i] == 1)
+        {
+            omittedCount++;
+        }
+    }
+
+    // Step B: Make sure at least 1 letter is hidden
+    if (omittedCount == 0 && wordLength > 0)
+    {
+        omitted[randomNo(0, wordLength - 1)] = 1;
+        omittedCount++;
+    }
+
+    // Step C: Keep revealing random letters until at least 2 letters are visible
+    while (wordLength - omittedCount < 2 && omittedCount > 0)
+    {
+        int randomIndex = randomNo(0, wordLength - 1);
+        if (omitted[randomIndex] == 1)
+        {
+            omitted[randomIndex] = 0; // Make this letter visible
+            omittedCount--;
+        }
+    }
+}
+
 void createDashes(const string &word, string &dashes)
 {
-    uint16_t wordLength = word.length();
-    dashes = string(wordLength, ' '); // Fill with spaces (all letters visible)
+    int wordLength = word.length();
+    int omitted[50]; // Fixed-size array large enough for any word in words.hpp
+    getOmittedIndexes(word, omitted);
 
-    for (size_t i = 0; i < wordLength; i += 2)
+    dashes = string(wordLength, ' '); // Initialize all positions as visible (' ')
+    for (int i = 0; i < wordLength; ++i)
     {
-        dashes[i] = '_'; // Mark every 2nd letter as hidden ('_')
+        if (omitted[i] == 1)
+        {
+            dashes[i] = '_'; // Omit element where array value is 1
+        }
     }
 }
 
