@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
-#include <vector>
 #include <cstdint>
 #include "words.hpp"
 
@@ -12,8 +11,8 @@ using namespace std;
 char shiftChar(char c, int shift);
 int randomNo(int min, int max);
 bool validateInput(const string &input);
-void createDashes(const string &word, vector<bool> &dashes);
-void printLevel(const string &word, const vector<bool> &dashes, const string &shiftedWord, uint16_t level);
+void createDashes(const string &word, string &dashes);
+void printLevel(const string &word, const string &dashes, const string &shiftedWord, uint16_t level);
 void takeStringInput(string &input);
 void vigenereEncrypt(string &input, const string &key);
 void encrypt2(string &input);
@@ -102,33 +101,31 @@ int randomNo(int min, int max)
     return rand() % (max - min + 1) + min;
 }
 
-void createDashes(const string &word, vector<bool> &dashes)
+void createDashes(const string &word, string &dashes)
 {
     uint16_t wordLength = word.length();
-    for (size_t i = 0; i < wordLength; ++i)
-    {
-        dashes[i] = false; // Initialize all dashes to false (hidden)
-    }
+    dashes = string(wordLength, ' '); // Fill with spaces (all letters visible)
+
     for (size_t i = 0; i < wordLength; i += 2)
     {
-        dashes[i] = true; // Set the alternate indexes to true (hidden)
+        dashes[i] = '_'; // Mark every 2nd letter as hidden ('_')
     }
 }
 
-void printLevel(const string &word, const vector<bool> &dashes, const string &shiftedWord, uint16_t level)
+void printLevel(const string &word, const string &dashes, const string &shiftedWord, uint16_t level)
 {
     cout << "Current level: " << level << endl;
     cout << "Word length: " << word.length() << endl;
     cout << "Word: ";
     for (size_t i = 0; i < word.length(); ++i)
     {
-        if (dashes[i])
+        if (dashes[i] == '_')
         {
             cout << "_ "; // Print underscore for hidden letters
         }
         else
         {
-            cout << word[i] << " "; // Print the actual letter
+            cout << word[i] << " "; // Print the actual hint letter
         }
     }
     cout << "Encrypted word: ";
@@ -219,8 +216,7 @@ bool startLevel1(uint16_t &levelScore)
     string input = "";
     size_t attempts = 0;                               // Initialize attempts to 0
     const string &randomWord = words1[randomNo(0, 9)]; // Random word selection from words1
-    const int wordLength = randomWord.length();
-    vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
+    string dashes = ""; // Uses a simple string instead of vector<bool>
     createDashes(randomWord, dashes);
     uint8_t randomShift = randomNo(1, 25); // Random shift between 1 and 25
     string shiftedWord = randomWord;       // Create a copy of the random word to shift
@@ -260,8 +256,7 @@ bool startLevel2(uint16_t &levelScore)
     string input = "";
     size_t attempts = 0;                               // Initialize attempts to 0
     const string &randomWord = words2[randomNo(0, 9)]; // Random word selection from words2
-    const int wordLength = randomWord.length();
-    vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
+    string dashes = ""; // Uses a simple string instead of vector<bool>
     createDashes(randomWord, dashes);
     string shiftedWord = randomWord;                // Create a copy of the random word to shift
     encrypt2(shiftedWord);                          // Create a copy of the random word to shift
@@ -296,8 +291,7 @@ bool startLevel3(uint16_t &levelScore)
     cout << "Starting Level 3..." << endl;
     size_t attempts = 0;                               // Initialize attempts to 0
     const string &randomWord = words3[randomNo(0, 9)]; // Random word selection from words3
-    const int wordLength = randomWord.length();
-    vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
+    string dashes = ""; // Uses a simple string instead of vector<bool>
     createDashes(randomWord, dashes);
     string shiftedWord = randomWord;                // Create a copy of the random word to shift
     string key = keys[randomNo(0, 9)];              // Random key selection from keys
@@ -334,8 +328,7 @@ bool startLevel4(uint16_t &levelScore)
     cout << "Starting Level 4..." << endl;
     size_t attempts = 0;                               // Initialize attempts to 0
     const string &randomWord = words3[randomNo(0, 9)]; // Random word selection from words4
-    const int wordLength = randomWord.length();
-    vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
+   string dashes = ""; // Uses a simple string instead of vector<bool>
     createDashes(randomWord, dashes);
     string shiftedWord = randomWord;                // Create a copy of the random word to shift
     string key = keys[randomNo(0, 9)];              // Random key selection from keys
