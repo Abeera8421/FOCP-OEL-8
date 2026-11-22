@@ -9,6 +9,13 @@
 #include "game.hpp"  // Brings in all function declarations for this file
 
 using namespace std;
+const string GREEN = "\033[32m";
+const string RED = "\033[31m";
+const string YELLOW = "\033[33m";
+const string CYAN = "\033[36m";
+const string PURPLE = "\033[35m";
+const string WHITE = "\033[37m";
+const string RESET = "\033[0m";
 
 // Picks a random whole number between min and max (inclusive)
 int randomNo(int min, int max) {
@@ -58,22 +65,22 @@ string createDashes(string word) {
 
 // Prints the era header, mission briefing, field intel note, puzzle board, and cipher chart
 void printLevel(string word, string dashes, string encryptedWord, int level) {
-    cout << "\n+--------------------------------------------------------------+" << endl;
+    cout << "\n" << CYAN << "+--------------------------------------------------------------+" << endl;
     cout << "  LEVEL " << level << " : " << eraTitles[level] << endl;
-    cout << "  LENGTH  : " << word.length() << " CHARACTERS (INCLUDING SPACES)" << endl;
-    cout << "+--------------------------------------------------------------+" << endl;
-    cout << "  MISSION BRIEFING:" << endl;
-    cout << "  " << missionBriefings[level] << "\n" << endl;
-    cout << "  " << cipherStyleNote << endl;
+    cout << "  LENGTH  : " << WHITE << word.length() << " CHARACTERS (INCLUDING SPACES)" << endl;
+    cout << "+--------------------------------------------------------------+" << RESET << endl;
+    cout << PURPLE << "  MISSION BRIEFING:" << RESET << endl;
+    cout << WHITE << "  " << missionBriefings[level] << RESET << "\n" << endl;
+    cout << YELLOW << "  " << cipherStyleNote << RESET << endl;
     cout << "+--------------------------------------------------------------+" << endl;
 
-    cout << "  PUZZLE    : ";
-    for (int i = 0; i < word.length(); i++) {
-        if (dashes[i] == '_') cout << "_ ";      // Hide letter with underscore
-        else if (word[i] == ' ') cout << "   ";   // Extra space so word gaps stand out
-        else cout << word[i] << " ";              // Show hint letter
-    }
-    cout << "\n  ENCRYPTED : " << encryptedWord << endl;
+    cout << WHITE << "  PUZZLE    : " << RESET;
+   for (int i = 0; i < word.length(); i++) {
+     if (dashes[i] == '_') cout << YELLOW << "_ " << RESET;
+   else if (word[i] == ' ') cout << "   ";
+     else cout << GREEN << word[i] << " " << RESET;
+  }
+    cout << "\n" << CYAN << "  ENCRYPTED : " << encryptedWord << RESET << endl;
     cout << "+--------------------------------------------------------------+" << endl;
 
     if (level <= 3) {
@@ -148,9 +155,10 @@ string reversedAtbash(string input) {
 void printStatusBar(int lives, int remaining) {
     cout << "  LIVES: [";
     for (int i = 0; i < 5; i++) {
-        cout << (i < lives ? "#" : "-");
+        cout << (i < lives ? GREEN + "#" + RESET : RED + "-" + RESET);
     }
-    cout << "] (" << lives << "/5)  |  TIME LEFT: " << remaining << "s   ";
+    cout << "] (" << GREEN << lives << RESET << "/5)  |  TIME LEFT: "
+         << YELLOW << remaining << RESET << "s   ";
 }
 
 // Runs the live 90-second ticking countdown, lives bar, scoring, and Codex unlock
@@ -199,7 +207,7 @@ bool playLevelLoop(string answer, string dashes, string encryptedWord, int level
         }
 
         if (input == "") {
-            cout << "  Input cannot be empty.\n\n";
+            cout << RED << "  [!] Input cannot be empty." << RESET << "\n\n";
             printStatusBar(lives, timeLimit - (time(0) - startTime));
             cout << "\n  Enter your guess: " << flush;
             continue;
@@ -217,7 +225,7 @@ bool playLevelLoop(string answer, string dashes, string encryptedWord, int level
         }
 
         if (!validateInput(input)) {
-            cout << "  Invalid input (letters and spaces only).\n\n";
+            cout << RED << "  [!] Invalid input (letters and spaces only)." << RESET << "\n\n";
             printStatusBar(lives, timeLimit - (time(0) - startTime));
             cout << "\n  Enter your guess: " << flush;
             continue;
@@ -228,15 +236,15 @@ bool playLevelLoop(string answer, string dashes, string encryptedWord, int level
             timerThread.join();
 
             int timeTaken = time(0) - startTime;
-            cout << "\n  MISSION ACCOMPLISHED! Decoded in " << timeTaken << "s." << endl;
+            cout << "\n" << GREEN << "  MISSION ACCOMPLISHED!" << RESET << " Decoded in " << timeTaken << "s." << endl;
 
             int earned = basePoints;
             if (wrongGuesses == 0) {
                 earned += 2;
-                cout << "  First-Try Bonus: +2 points!" << endl;
+                cout << GREEN << "  First-Try Bonus: +2 points!" << RESET << endl;
             } else {
                 earned -= wrongGuesses;
-                cout << "  Wrong Guess Penalty (" << wrongGuesses << " missed): -" << wrongGuesses << " points" << endl;
+                cout << RED << "  Wrong Guess Penalty (" << wrongGuesses << " missed): -" << wrongGuesses << " points" << RESET << endl;
             }
 
             if (timeTaken <= 20) {
@@ -249,19 +257,20 @@ bool playLevelLoop(string answer, string dashes, string encryptedWord, int level
 
             if (earned < 1) earned = 1;
             levelScore = earned;
-            cout << "  Level " << level << " Score Earned: " << levelScore << " pts" << endl;
+            cout << GREEN << "  Level " << level << " Score Earned: " << levelScore << " pts" << RESET << endl;
 
-            cout << "\n==============================================================" << endl;
+            cout << "\n" << GREEN;
+            cout << "==============================================================" << endl;
             cout << "  DECLASSIFIED CODEX #0" << level << " : " << eraTitles[level] << endl;
             cout << "--------------------------------------------------------------" << endl;
-            cout << "  " << codexEntries[level] << endl;
-            cout << "==============================================================\n" << endl;
+            cout << WHITE << "  " << codexEntries[level] << GREEN << endl;
+            cout << "==============================================================" << RESET << "\n" << endl;
             return true;
         } else {
             wrongGuesses++;
             lives = 5 - wrongGuesses;
             if (wrongGuesses < 5 && !timeExpired) {
-                cout << "  Incorrect guess. Try again.\n\n";
+                cout << RED << "  [!] Incorrect guess. Try again." << RESET << "\n\n";
                 printStatusBar(lives, timeLimit - (time(0) - startTime));
                 cout << "\n  Enter your guess: " << flush;
             }
@@ -272,9 +281,11 @@ bool playLevelLoop(string answer, string dashes, string encryptedWord, int level
     if (timerThread.joinable()) timerThread.join();
 
     if (timeExpired) {
-        cout << "\n  Time's up! The intercepted message was: " << answer << "\n" << endl;
+        cout << "\n" << RED << "  [!] Time's up! " << RESET
+             << "The intercepted message was: " << answer << "\n" << endl;
     } else {
-        cout << "\n  Out of attempts! The intercepted message was: " << answer << "\n" << endl;
+        cout << "\n" << RED << "  [!] Out of attempts! " << RESET
+             << "The intercepted message was: " << answer << "\n" << endl;
     }
     return false;
 }
