@@ -136,6 +136,23 @@ void printLevel(const string &word, const vector<bool> &dashes, const string &sh
     cout << endl; // New line after printing the level
 }
 
+void revealHint(const string &word, vector<bool> &dashes)
+{
+    for (size_t i = 0; i < word.length(); i++)
+    {
+        if (dashes[i])
+        {
+            dashes[i] = false;
+
+            cout << "Hint: The letter at position "
+                 << i + 1 << " is " << word[i] << endl;
+
+            return;
+        }
+    }
+
+    cout << "No hidden letters left to reveal." << endl;
+}
 void takeStringInput(string &input)
 {
     cout << "Enter a string: ";
@@ -180,15 +197,17 @@ void XOREncrypt(string &input, const string &key)
     }
 }
 
+
 void toHex(const string &input, string &hexOutput)
 {
-    hexOutput.clear();                                                               // Clear the output string before appending
-    uint8_t hexArr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F'}; // Hexadecimal characters
-    for (char c : input)
+    const string hexDigits = "0123456789ABCDEF";
+
+    hexOutput.clear();
+
+    for (unsigned char byte : input)
     {
-        uint8_t byte = static_cast<uint8_t>(c);  // Convert character to its byte representation
-        hexOutput += hexArr[(byte >> 4) & 0x0F]; // Append the high nibble (4 bits)
-        hexOutput += hexArr[byte & 0x0F];        // Append the low nibble (4 bits)
+        hexOutput += hexDigits[(byte >> 4) & 0x0F];
+        hexOutput += hexDigits[byte & 0x0F];
     }
 }
 
@@ -213,7 +232,6 @@ void toChar(const string &hexInput, string &charOutput)
         charOutput += byte;                                                     // Append the character to the output string
     }
 }
-
 bool startLevel1(uint16_t &levelScore)
 {
     string input = "";
@@ -302,11 +320,21 @@ bool startLevel3(uint16_t &levelScore)
     string shiftedWord = randomWord;                // Create a copy of the random word to shift
     string key = keys[randomNo(0, 9)];              // Random key selection from keys
     XOREncrypt(shiftedWord, key);                   // Encrypt the shifted word using XOR
-    printLevel(randomWord, dashes, shiftedWord, 3); // Print the initial state of the level
+    // Convert encrypted bytes into readable hexadecimal
+    string hexOutput;
+    toHex(shiftedWord, hexOutput);
+    printLevel(randomWord, dashes, hexOutput, 3); // Print the initial state of the level
     string input = "";
     while (input != randomWord && attempts < 5) // Allow up to 3 attempts
     {
         takeStringInput(input);
+        if (input == "HINT" || input == "hint" || input == "Hint")
+{
+    revealHint(randomWord, dashes);
+    printLevel(randomWord, dashes, hexOutput, 3);
+    input = "";
+    continue;
+}
         if (!validateInput(input))
         {
             cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
@@ -343,18 +371,22 @@ bool startLevel4(uint16_t &levelScore)
     string input = "";
     string hexOutput;
     toHex(shiftedWord, hexOutput);              // Convert the shifted word to hexadecimal representation
-    printLevel(randomWord, dashes, shiftedWord, 4); // Print the initial state of the level
-    cout << "Hexadecimal representation: " << hexOutput << endl;
+    printLevel(randomWord, dashes, hexOutput, 4);// Print the initial state of the level
     while (input != randomWord && attempts < 5) // Allow up to 5 attempts
     {
         takeStringInput(input);
+        if (input == "HINT" || input == "hint" || input == "Hint")
+{
+    revealHint(randomWord, dashes);
+    printLevel(randomWord, dashes, hexOutput, 4);
+    input = "";
+    continue;
+}
         if (input.empty())
         {
             cout << "Input cannot be empty. Please enter a valid guess." << endl;
             continue; // Skip the rest of the loop and prompt for input again
         }
-        string charOutput;
-        toChar(hexOutput, charOutput); // Convert the hexadecimal representation back to characters
         if (!validateInput(input))
         {
             cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
