@@ -135,8 +135,9 @@ In accordance with the Lab 08 guidelines on supplementary tools, AI assistance (
   * Managed Git branches and pull requests and performed cross-platform testing, debugging, and final submission verification.
 
 * **Hooria Mansoor (`@hooriamansoorahmed-lgtm`):**
-  * Implemented the Level 1 **Caesar Shift** encryption logic (`shiftChar`).
-  * Designed and implemented the **ANSI terminal color palette** (`GREEN`, `RED`, `YELLOW`, `RESET`) and the interactive **`HINT` lifeline** (`revealHint`).
+  * Implemented the Level 1 **Caesar Shift** encryption logic (`shiftChar`) to encode messages using monoalphabetic letter rotation.
+  * Designed and integrated the **ANSI terminal color palette** (`GREEN`, `RED`, `YELLOW`, `RESET`) to provide clear visual feedback for success states, errors, and warnings.
+  * Built the interactive **`HINT` lifeline** (`revealHint`) and command handling, allowing players to uncover hidden target characters mid-round without losing an attempt.
 
 * **Abeera Ahsan (`@Abeera8421`):**
   * Refactored the codebase into modular files (`game.hpp`, `game.cpp`, `words.hpp`) and consolidated duplicate level loops into `startLevel()`.
