@@ -40,7 +40,7 @@ int main() {
         cin.ignore(1000, '\n');
         cout << RED << "[!] Invalid choice. Enter 1-6 or 0 to exit: " << RESET;
          }
-        }
+        
         cin.ignore(1000, '\n');
 
         if (choice == 0) break;
