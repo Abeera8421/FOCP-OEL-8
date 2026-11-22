@@ -9,6 +9,7 @@ std::string createDashes(std::string word);
 void printLevel(std::string word, std::string dashes, std::string encryptedWord, int level);
 
 // Encryption Functions
+std::string reversedAtbash(std::string input);
 void encrypt2(std::string &input);
 void vigenereEncrypt(std::string &input, std::string key);
 void XOREncrypt(std::string &input, std::string key);

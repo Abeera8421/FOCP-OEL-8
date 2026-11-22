@@ -49,10 +49,11 @@ const std::string missionBriefings[] = {
     "May 2017, Global Cyberattack. A dangerous computer worm is locking hospital computers worldwide. Decode the hex bytes to find the hidden kill-switch and stop it!"
 };
 
-// Historical note explaining why real dispatches use short phrases
+// Note explaining why cipher dispatches and cyber alerts use short phrases
 const std::string cipherStyleNote =
-    "FIELD INTEL: Real military cryptographers avoided filler words like 'THE', 'IS', or 'WILL'—"
-    "sending short telegraphic phrases saved critical time and prevented enemy codebreakers from spotting common word patterns.";
+    "FIELD INTEL: Cryptographers and security analysts avoid filler words like 'THE', 'IS', or 'WILL'—\n"
+    "  short command phrases save critical time and prevent attackers from spotting common word patterns.";
+
 
 // Educational Codex entries unlocked after winning each level
 const std::string codexEntries[] = {
@@ -60,5 +61,5 @@ const std::string codexEntries[] = {
     "HOW IT WORKED (CAESAR SHIFT): Julius Caesar hid military orders by shifting every letter forward in the alphabet (usually by 3). Even if enemy scouts caught the messenger, they couldn't read the plan.",
     "HOW IT WORKED (ROTOR MACHINES): WWII Enigma machines changed the letter shift on every keypress using spinning wheels (rotors). Alan Turing's team at Bletchley Park cracked these daily settings and helped end the war early.",
     "HOW IT WORKED (VIGENERE CIPHER): Instead of one shift for the whole phrase, the Vigenere cipher uses a repeating keyword so the same letter turns into different letters—making it much harder to guess.",
-    "HOW IT WORKED (BITWISE XOR & HEX): Modern computers encrypt data using XOR—a fast math trick that flips binary bits with a secret key. Running XOR a second time with the same key instantly unlocks the original text."
+    "HOW IT WORKED (XOR HEX & ATBASH): Modern computers encrypt data using XOR—a fast math trick that flips binary bits with a secret key. Combined with a Reversed Atbash mirror (flipping A<->Z and reading backwards), analysts get two layers to cross-check."
 };

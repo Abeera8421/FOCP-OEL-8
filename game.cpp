@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
+#include <thread>
+#include <chrono>
 #include "words.hpp" // Brings in themed phrases, secret keys, briefings, and codex entries
 #include "game.hpp"  // Brings in all function declarations for this file
 
@@ -82,7 +84,7 @@ void printLevel(string word, string dashes, string encryptedWord, int level) {
         cout << "   N  O  P  Q  R  S  T  U  V  W  X  Y  Z" << endl;
         cout << "  13 14 15 16 17 18 19 20 21 22 23 24 25\n" << endl;
     } else {
-        cout << "  HEX TIP: Each 2-digit pair = 1 XOR-encrypted byte (including spaces).\n" << endl;
+        cout << "  DUAL-CLUE TIP: Decode using EITHER the XOR Hex bytes OR the ATBASH-CIPHER clue (read backwards + flip A<->Z)!\n" << endl;
     }
     cout << "  (Type MENU or 0 anytime to switch levels)\n" << endl;
 }
@@ -124,58 +126,107 @@ string toHex(string input) {
     return hexOutput;
 }
 
-/// Runs the 90-second guessing loop, lives bar, scoring, and Codex unlock
+// Level 4 Secondary Cipher: Flips A<->Z and reverses the text right-to-left
+string reversedAtbash(string input) {
+    string mirrored = "";
+    for (int i = 0; i < input.length(); i++) {
+        if (isalpha(input[i])) {
+            mirrored += ('Z' - (toupper(input[i]) - 'A'));
+        } else {
+            mirrored += input[i]; // Keep spaces unchanged
+        }
+    }
+
+    string reversed = "";
+    for (int i = mirrored.length() - 1; i >= 0; i--) {
+        reversed += mirrored[i];
+    }
+    return reversed;
+}
+
+// Prints the 5-life bar and remaining seconds cleanly in one place
+void printStatusBar(int lives, int remaining) {
+    cout << "  LIVES: [";
+    for (int i = 0; i < 5; i++) {
+        cout << (i < lives ? "#" : "-");
+    }
+    cout << "] (" << lives << "/5)  |  TIME LEFT: " << remaining << "s   ";
+}
+
+// Runs the live 90-second ticking countdown, lives bar, scoring, and Codex unlock
 bool playLevelLoop(string answer, string dashes, string encryptedWord, int level, int basePoints, int &levelScore) {
     printLevel(answer, dashes, encryptedWord, level);
 
     string input = "";
     int wrongGuesses = 0;
+    int lives = 5;
     int timeLimit = 90;
     time_t startTime = time(0);
+    bool levelRunning = true;
+    bool timeExpired = false;
 
-    while (input != answer && wrongGuesses < 5) {
-        int remaining = timeLimit - (time(0) - startTime);
-        if (remaining <= 0) {
-            cout << "\n  Time's up! The intercepted message was: " << answer << "\n" << endl;
-            return false;
+    cout << "\n";
+    printStatusBar(lives, timeLimit);
+    cout << "\n  Enter your guess: " << flush;
+
+    // Background countdown that updates TIME LEFT every second while you type
+    thread timerThread([&]() {
+        while (levelRunning) {
+            this_thread::sleep_for(chrono::seconds(1));
+            if (!levelRunning) break;
+
+            int remaining = timeLimit - (time(0) - startTime);
+            if (remaining <= 0) {
+                timeExpired = true;
+                levelRunning = false;
+                cout << "\n\n  TIME'S UP! Press Enter to continue..." << flush;
+                break;
+            }
+
+            // Save cursor, move up 1 line to update status bar, restore cursor
+            cout << "\033[s\033[1A\r";
+            printStatusBar(lives, remaining);
+            cout << "\033[u" << flush;
         }
+    });
 
-        // Print 5-life bar
-        int livesLeft = 5 - wrongGuesses;
-        cout << "\n  LIVES: [";
-        for (int i = 0; i < 5; i++) {
-            if (i < livesLeft) cout << "#";
-            else cout << "-";
-        }
-        cout << "] (" << livesLeft << "/5)  |  TIME LEFT: " << remaining << "s" << endl;
-
-        cout << "  Enter your guess: ";
+    while (input != answer && wrongGuesses < 5 && !timeExpired) {
         getline(cin, input);
 
-        if (time(0) - startTime >= timeLimit) {
-            cout << "\n  Time's up! The intercepted message was: " << answer << "\n" << endl;
-            return false;
+        if (timeExpired || (time(0) - startTime >= timeLimit)) {
+            timeExpired = true;
+            break;
         }
+
         if (input == "") {
-            cout << "\n  Input cannot be empty. Please enter a valid guess." << endl;
+            cout << "  Input cannot be empty.\n\n";
+            printStatusBar(lives, timeLimit - (time(0) - startTime));
+            cout << "\n  Enter your guess: " << flush;
             continue;
         }
 
-        // Convert guess to uppercase so lowercase typing works
         for (int i = 0; i < input.length(); i++) {
             input[i] = toupper(input[i]);
         }
 
         if (input == "0" || input == "MENU") {
+            levelRunning = false;
+            timerThread.join();
             cout << "\n  Returning to level menu...\n" << endl;
             return false;
         }
+
         if (!validateInput(input)) {
-            cout << "\n  Invalid input. Please enter only alphabetic characters and spaces." << endl;
+            cout << "  Invalid input (letters and spaces only).\n\n";
+            printStatusBar(lives, timeLimit - (time(0) - startTime));
+            cout << "\n  Enter your guess: " << flush;
             continue;
         }
 
         if (input == answer) {
+            levelRunning = false;
+            timerThread.join();
+
             int timeTaken = time(0) - startTime;
             cout << "\n  MISSION ACCOMPLISHED! Decoded in " << timeTaken << "s." << endl;
 
@@ -207,12 +258,24 @@ bool playLevelLoop(string answer, string dashes, string encryptedWord, int level
             cout << "==============================================================\n" << endl;
             return true;
         } else {
-            cout << "\n  Incorrect guess. Try again." << endl;
             wrongGuesses++;
+            lives = 5 - wrongGuesses;
+            if (wrongGuesses < 5 && !timeExpired) {
+                cout << "  Incorrect guess. Try again.\n\n";
+                printStatusBar(lives, timeLimit - (time(0) - startTime));
+                cout << "\n  Enter your guess: " << flush;
+            }
         }
     }
 
-    cout << "\n  Out of attempts! The intercepted message was: " << answer << "\n" << endl;
+    levelRunning = false;
+    if (timerThread.joinable()) timerThread.join();
+
+    if (timeExpired) {
+        cout << "\n  Time's up! The intercepted message was: " << answer << "\n" << endl;
+    } else {
+        cout << "\n  Out of attempts! The intercepted message was: " << answer << "\n" << endl;
+    }
     return false;
 }
 
@@ -240,11 +303,11 @@ bool startLevel(int level, int &levelScore) {
         encrypt2(encryptedWord);
     } else if (level == 3) {
         vigenereEncrypt(encryptedWord, keys[randomNo(0, 9)]);
-    } else if (level == 4) {
-        XOREncrypt(encryptedWord, keys[randomNo(0, 9)]);
-        encryptedWord = toHex(encryptedWord);
+        } else if (level == 4) {
+        string xorCopy = answer;
+        XOREncrypt(xorCopy, keys[randomNo(0, 9)]);
+        encryptedWord = toHex(xorCopy) + "\n  ATBASH-CIPHER: " + reversedAtbash(answer);
     }
-
     return playLevelLoop(answer, dashes, encryptedWord, level, basePoints, levelScore);
 }
 
