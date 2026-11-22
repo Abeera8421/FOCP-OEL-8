@@ -3,84 +3,78 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
-#include <cstdint>
-#include "words.hpp"
-#include "game.hpp"
+#include "words.hpp" // Brings in themed phrases, secret keys, briefings, and codex entries
+#include "game.hpp"  // Brings in all function declarations for this file
 
 using namespace std;
 
-// Function to validate input string (only alphabetic characters and spaces are allowed)
-bool validateInput(const string &input) {
-    for (char c : input) {
-        if (!isalpha(c) && !isspace(c)) return false; // Invalid character found
-    }
-    return true; // All characters are valid
-}
-
-// Function to shift a character by a given number of positions in the alphabet
-char shiftChar(char c, int shift) {
-    if (isalpha(c)) {
-        char base = islower(c) ? 'a' : 'A'; // Preserve uppercase or lowercase base
-        return ((c - base + shift) % 26) + base;
-    }
-    return c; // Non-alphabetic characters are not shifted
-}
-
-// Function to generate a random number between min and max (inclusive)
+// Picks a random whole number between min and max (inclusive)
 int randomNo(int min, int max) {
     return rand() % (max - min + 1) + min;
 }
 
-// Builds a 0/1 array marking half the word's indexes at random to hide (1 = hide, 0 = show)
-void getOmittedIndexes(const string &word, int omitted[]) {
-    int wordLength = word.length();
-    for (int i = 0; i < wordLength; ++i) {
-        omitted[i] = 0; // Start with all letters visible (0)
+// Shifts one letter forward by 'shift' places (spaces stay unchanged)
+char shiftChar(char c, int shift) {
+    if (isalpha(c)) {
+        char base = islower(c) ? 'a' : 'A';
+        return ((c - base + shift) % 26) + base;
     }
-
-    int targetOmitted = wordLength / 2; // Omit half the word randomly
-    int omittedCount = 0;
-    while (omittedCount < targetOmitted) {
-        int randomIndex = randomNo(0, wordLength - 1);
-        if (omitted[randomIndex] == 0) {
-            omitted[randomIndex] = 1; // Mark random index as omitted (1)
-            omittedCount++;
-        }
-    }
+    return c;
 }
 
-// Turns the 0/1 omitted array into a string of underscores ('_') and spaces (' ')
-void createDashes(const string &word, string &dashes) {
-    int wordLength = word.length();
-    int omitted[50];                  // Fixed-size array large enough for any word in words.hpp
-    getOmittedIndexes(word, omitted); // Populate the 0/1 omitted array
-
-    dashes = string(wordLength, ' '); // Initialize all positions as visible (' ')
-    for (int i = 0; i < wordLength; ++i) {
-        if (omitted[i] == 1) {
-            dashes[i] = '_'; // Omit element where array value is 1
+// Returns true if the player's guess contains only letters and spaces
+bool validateInput(string input) {
+    for (int i = 0; i < input.length(); i++) {
+        if (!isalpha(input[i]) && !isspace(input[i])) {
+            return false;
         }
     }
+    return true;
 }
 
-// Draws the puzzle card, hidden word, encrypted clue, and alphabet table
-void printLevel(const string &word, const string &dashes, const string &shiftedWord, uint16_t level) {
-    cout << "\n+------------------------------------------------+" << endl;
-    cout << "  LEVEL " << level << "  |  WORD LENGTH: " << word.length() << " LETTERS" << endl;
-    cout << "+------------------------------------------------+" << endl;
+// Hides half of the alphabetic letters with '_' while keeping spaces visible
+string createDashes(string word) {
+    int letterCount = 0;
+    for (int i = 0; i < word.length(); i++) {
+        if (isalpha(word[i])) {
+            letterCount++; // Count only actual letters so spaces are never hidden
+        }
+    }
+
+    string dashes(word.length(), ' '); // Start with spaces everywhere
+    int hidden = 0;
+    while (hidden < letterCount / 2) {
+        int idx = randomNo(0, word.length() - 1);
+        // Only hide alphabetic letters that aren't already hidden
+        if (isalpha(word[idx]) && dashes[idx] != '_') {
+            dashes[idx] = '_';
+            hidden++;
+        }
+    }
+    return dashes;
+}
+
+// Prints the era header, mission briefing, field intel note, puzzle board, and cipher chart
+void printLevel(string word, string dashes, string encryptedWord, int level) {
+    cout << "\n+--------------------------------------------------------------+" << endl;
+    cout << "  LEVEL " << level << " : " << eraTitles[level] << endl;
+    cout << "  LENGTH  : " << word.length() << " CHARACTERS (INCLUDING SPACES)" << endl;
+    cout << "+--------------------------------------------------------------+" << endl;
+    cout << "  MISSION BRIEFING:" << endl;
+    cout << "  " << missionBriefings[level] << "\n" << endl;
+    cout << "  " << cipherStyleNote << endl;
+    cout << "+--------------------------------------------------------------+" << endl;
+
     cout << "  PUZZLE    : ";
-    for (size_t i = 0; i < word.length(); ++i) {
-        if (dashes[i] == '_') {
-            cout << "_ "; // Hide letter with an underscore
-        } else {
-            cout << word[i] << " "; // Reveal hint letter
-        }
+    for (int i = 0; i < word.length(); i++) {
+        if (dashes[i] == '_') cout << "_ ";      // Hide letter with underscore
+        else if (word[i] == ' ') cout << "   ";   // Extra space so word gaps stand out
+        else cout << word[i] << " ";              // Show hint letter
     }
-    cout << "\n  ENCRYPTED : " << shiftedWord << endl;
-    cout << "+------------------------------------------------+" << endl;
+    cout << "\n  ENCRYPTED : " << encryptedWord << endl;
+    cout << "+--------------------------------------------------------------+" << endl;
 
     if (level <= 3) {
-        // Show A=0..Z=25 lookup grid for alphabetical shift levels
         cout << "  CIPHER REFERENCE (A=0 ... Z=25):" << endl;
         cout << "   A  B  C  D  E  F  G  H  I  J  K  L  M" << endl;
         cout << "   0  1  2  3  4  5  6  7  8  9 10 11 12" << endl;
@@ -88,70 +82,66 @@ void printLevel(const string &word, const string &dashes, const string &shiftedW
         cout << "   N  O  P  Q  R  S  T  U  V  W  X  Y  Z" << endl;
         cout << "  13 14 15 16 17 18 19 20 21 22 23 24 25\n" << endl;
     } else {
-        // Show hex hint for Level 4 XOR output
-        cout << "  HEX TIP: Each 2-digit pair = 1 XOR-encrypted byte.\n" << endl;
+        cout << "  HEX TIP: Each 2-digit pair = 1 XOR-encrypted byte (including spaces).\n" << endl;
     }
     cout << "  (Type MENU or 0 anytime to switch levels)\n" << endl;
 }
 
-// Reads the player's full guess line cleanly aligned with the puzzle UI
-void takeStringInput(string &input) {
-    cout << "  Enter your guess: ";
-    getline(cin, input);
-}
-
-// Level 2 Cipher: Shifts even-indexed letters by one random key and odd-indexed by another
+// Level 2 Cipher (Dual-Rotor): Shifts even positions with one key and odd positions with another
 void encrypt2(string &input) {
-    uint8_t shiftEven = randomNo(1, 25); // Random shift for even-indexed characters
-    uint8_t shiftOdd = randomNo(1, 25);  // Random shift for odd-indexed characters
-    for (size_t i = 0; i < input.length(); ++i) {
-        input[i] = shiftChar(input[i], (i % 2 == 0) ? shiftEven : shiftOdd);
+    int shiftEven = randomNo(1, 25);
+    int shiftOdd = randomNo(1, 25);
+    for (int i = 0; i < input.length(); i++) {
+        if (i % 2 == 0) input[i] = shiftChar(input[i], shiftEven);
+        else input[i] = shiftChar(input[i], shiftOdd);
     }
 }
 
-// Level 3 Cipher: Shifts each letter using a repeating secret keyword
-void vigenereEncrypt(string &input, const string &key) {
-    for (size_t i = 0; i < input.length(); ++i) {
-        int shift = toupper(key[i % key.length()]) - 'A'; // Repeat key if word is longer than key
+// Level 3 Cipher (Vigenere): Shifts each letter using a repeating secret keyword
+void vigenereEncrypt(string &input, string key) {
+    for (int i = 0; i < input.length(); i++) {
+        int shift = toupper(key[i % key.length()]) - 'A';
         input[i] = shiftChar(input[i], shift);
     }
 }
 
-// Level 4 Cipher: Bitwise XORs each character against a repeating secret keyword
-void XOREncrypt(string &input, const string &key) {
-    for (size_t i = 0; i < input.length(); ++i) {
-        input[i] ^= key[i % key.length()]; // XOR each byte with the corresponding key byte
+// Level 4 Cipher (XOR): Bitwise XOR against a repeating secret keyword
+void XOREncrypt(string &input, string key) {
+    for (int i = 0; i < input.length(); i++) {
+        input[i] = input[i] ^ key[i % key.length()];
     }
 }
 
-// Converts raw XOR-encrypted bytes into readable 2-digit hexadecimal pairs
-void toHex(const string &input, string &hexOutput) {
-    hexOutput.clear(); // Clear output string before appending hex pairs
-    const string hexDigits = "0123456789ABCDEF";
-    for (unsigned char byte : input) {
-        hexOutput += hexDigits[byte / 16]; // First hex digit (quotient when divided by 16)
-        hexOutput += hexDigits[byte % 16]; // Second hex digit (remainder when divided by 16)
+// Turns XOR-encrypted characters into 2-digit hexadecimal pairs
+string toHex(string input) {
+    string hexOutput = "";
+    string hexDigits = "0123456789ABCDEF";
+    for (int i = 0; i < input.length(); i++) {
+        unsigned char byte = input[i];
+        hexOutput += hexDigits[byte / 16]; // First hex digit
+        hexOutput += hexDigits[byte % 16]; // Second hex digit
     }
+    return hexOutput;
 }
 
-// Shared gameplay engine for all levels: timer, lives, validation, menu exit, and scoring
-bool playLevelLoop(const string &randomWord, const string &dashes, const string &encryptedDisplay, uint16_t levelNum, uint16_t basePoints, uint16_t &levelScore) {
-    printLevel(randomWord, dashes, encryptedDisplay, levelNum); // Display puzzle board and cipher reference
+/// Runs the 90-second guessing loop, lives bar, scoring, and Codex unlock
+bool playLevelLoop(string answer, string dashes, string encryptedWord, int level, int basePoints, int &levelScore) {
+    printLevel(answer, dashes, encryptedWord, level);
 
     string input = "";
-    int attempts = 0;           // Track wrong guesses (max 5 allowed)
-    const int TIME_LIMIT = 60;  // 60-second countdown allowed per level
-    time_t startTime = time(0); // Record exact timestamp when the level begins
+    int wrongGuesses = 0;
+    int timeLimit = 90;
+    time_t startTime = time(0);
 
-    while (input != randomWord && attempts < 5) {
-        int remaining = TIME_LIMIT - (time(0) - startTime); // Calculate remaining seconds on the clock
+    while (input != answer && wrongGuesses < 5) {
+        int remaining = timeLimit - (time(0) - startTime);
         if (remaining <= 0) {
-            cout << "\n  Time's up! You ran out of time. The word was: " << randomWord << "\n" << endl;
+            cout << "\n  Time's up! The intercepted message was: " << answer << "\n" << endl;
             return false;
         }
 
-        // Print visual lives bar ('#' = remaining life, '-' = lost life)
-        int livesLeft = 5 - attempts;
+        // Print 5-life bar
+        int livesLeft = 5 - wrongGuesses;
         cout << "\n  LIVES: [";
         for (int i = 0; i < 5; i++) {
             if (i < livesLeft) cout << "#";
@@ -159,121 +149,138 @@ bool playLevelLoop(const string &randomWord, const string &dashes, const string 
         }
         cout << "] (" << livesLeft << "/5)  |  TIME LEFT: " << remaining << "s" << endl;
 
-        takeStringInput(input);
+        cout << "  Enter your guess: ";
+        getline(cin, input);
 
-        // Check if the 60-second limit expired while the player was typing
-        if (time(0) - startTime >= TIME_LIMIT) {
-            cout << "\n  Time's up! You ran out of time. The word was: " << randomWord << "\n" << endl;
+        if (time(0) - startTime >= timeLimit) {
+            cout << "\n  Time's up! The intercepted message was: " << answer << "\n" << endl;
             return false;
         }
-
-        // Ignore empty Enter presses so they don't waste a life
-        if (input.empty()) {
+        if (input == "") {
             cout << "\n  Input cannot be empty. Please enter a valid guess." << endl;
             continue;
         }
 
-        // Convert every letter to uppercase so lowercase guesses work too
-        for (char &c : input) {
-            c = toupper(c);
+        // Convert guess to uppercase so lowercase typing works
+        for (int i = 0; i < input.length(); i++) {
+            input[i] = toupper(input[i]);
         }
 
-        // Allow player to type 0 or MENU anytime to abort and switch levels
         if (input == "0" || input == "MENU") {
             cout << "\n  Returning to level menu...\n" << endl;
             return false;
         }
-
-        // Ensure the guess contains only alphabetic characters and spaces
         if (!validateInput(input)) {
             cout << "\n  Invalid input. Please enter only alphabetic characters and spaces." << endl;
             continue;
         }
 
-        // Check if the player guessed the right word
-        if (input == randomWord) {
+        if (input == answer) {
             int timeTaken = time(0) - startTime;
-            cout << "\n  Congratulations! You've guessed the word correctly in " << timeTaken << "s." << endl;
+            cout << "\n  MISSION ACCOMPLISHED! Decoded in " << timeTaken << "s." << endl;
 
-            int earned = basePoints; // Start with the level's base points (3, 4, 5, or 6)
-
-            // 1. Accuracy bonus (+2 on 1st try) or penalty (-1 per missed guess)
-            if (attempts == 0) {
+            int earned = basePoints;
+            if (wrongGuesses == 0) {
                 earned += 2;
                 cout << "  First-Try Bonus: +2 points!" << endl;
             } else {
-                earned -= attempts;
-                cout << "  Wrong Guess Penalty (" << attempts << " missed): -" << attempts << " points" << endl;
+                earned -= wrongGuesses;
+                cout << "  Wrong Guess Penalty (" << wrongGuesses << " missed): -" << wrongGuesses << " points" << endl;
             }
 
-            // 2. Tiered speed bonus (<= 15s gives +3, 16-30s gives +2)
-            if (timeTaken <= 15) {
+            if (timeTaken <= 20) {
                 earned += 3;
-                cout << "  Lightning Speed Bonus (<= 15s): +3 points!" << endl;
-            } else if (timeTaken <= 30) {
+                cout << "  Lightning Speed Bonus (<= 20s): +3 points!" << endl;
+            } else if (timeTaken <= 45) {
                 earned += 2;
-                cout << "  Quick Speed Bonus (16-30s): +2 points!" << endl;
+                cout << "  Quick Speed Bonus (21-45s): +2 points!" << endl;
             }
 
-            if (earned < 1) earned = 1; // Always award at least 1 point for winning
-            levelScore += earned;
-            cout << "  Level " << levelNum << " Score Earned: " << levelScore << " pts\n" << endl;
-            return true; // Only return true when guessed right
+            if (earned < 1) earned = 1;
+            levelScore = earned;
+            cout << "  Level " << level << " Score Earned: " << levelScore << " pts" << endl;
+
+            cout << "\n==============================================================" << endl;
+            cout << "  DECLASSIFIED CODEX #0" << level << " : " << eraTitles[level] << endl;
+            cout << "--------------------------------------------------------------" << endl;
+            cout << "  " << codexEntries[level] << endl;
+            cout << "==============================================================\n" << endl;
+            return true;
         } else {
             cout << "\n  Incorrect guess. Try again." << endl;
-            attempts++;
+            wrongGuesses++;
         }
     }
 
-    cout << "\n  Out of attempts! The word was: " << randomWord << "\n" << endl;
-    return false; // Return false if all 5 attempts fail
+    cout << "\n  Out of attempts! The intercepted message was: " << answer << "\n" << endl;
+    return false;
 }
 
-// Level 1: Caesar Cipher (uniform forward shift across all letters)
-bool startLevel1(uint16_t &levelScore) {
-    cout << "Starting Level 1..." << endl;
-    const string &randomWord = words1[randomNo(0, 9)]; // Random word selection from words1
-    string dashes = "";                                // Uses a simple string instead of vector<bool>
-    createDashes(randomWord, dashes);                  // Generate random hidden positions for the puzzle board
-    uint8_t randomShift = randomNo(1, 25);             // Random shift between 1 and 25
-    string shiftedWord = randomWord;
-    for (char &c : shiftedWord) {
-        c = shiftChar(c, randomShift);                 // Shift each character in the word
+// Single unified function to set up and start any level (1 to 4)
+bool startLevel(int level, int &levelScore) {
+    cout << "\nStarting Level " << level << "..." << endl;
+    int idx = randomNo(0, 9);
+    string answer = "";
+    int basePoints = level + 2; // Level 1=3, Level 2=4, Level 3=5, Level 4=6
+
+    if (level == 1) answer = words1[idx];
+    else if (level == 2) answer = words2[idx];
+    else if (level == 3) answer = words3[idx];
+    else if (level == 4) answer = words4[idx];
+
+    string dashes = createDashes(answer);
+    string encryptedWord = answer;
+
+    if (level == 1) {
+        int shift = randomNo(1, 25);
+        for (int i = 0; i < encryptedWord.length(); i++) {
+            encryptedWord[i] = shiftChar(encryptedWord[i], shift);
+        }
+    } else if (level == 2) {
+        encrypt2(encryptedWord);
+    } else if (level == 3) {
+        vigenereEncrypt(encryptedWord, keys[randomNo(0, 9)]);
+    } else if (level == 4) {
+        XOREncrypt(encryptedWord, keys[randomNo(0, 9)]);
+        encryptedWord = toHex(encryptedWord);
     }
-    return playLevelLoop(randomWord, dashes, shiftedWord, 1, 3, levelScore);
+
+    return playLevelLoop(answer, dashes, encryptedWord, level, basePoints, levelScore);
 }
 
-// Level 2: Dual-Rotor Shift (separate random shifts for even and odd letter positions)
-bool startLevel2(uint16_t &levelScore) {
-    cout << "Starting Level 2..." << endl;
-    const string &randomWord = words2[randomNo(0, 9)]; // Random word selection from words2
-    string dashes = "";                                // Uses a simple string instead of vector<bool>
-    createDashes(randomWord, dashes);                  // Generate random hidden positions for the puzzle board
-    string shiftedWord = randomWord;
-    encrypt2(shiftedWord);                             // Apply alternating even/odd Caesar shifts
-    return playLevelLoop(randomWord, dashes, shiftedWord, 2, 4, levelScore);
+// Shows unlocked Codex entries from the main menu
+void viewCodexArchive(bool completed[]) {
+    cout << "\n==============================================================" << endl;
+    cout << "                 DECLASSIFIED CODEX ARCHIVE                   " << endl;
+    cout << "==============================================================" << endl;
+    for (int i = 1; i <= 4; i++) {
+        cout << "\n  [CODEX #0" << i << " - " << eraTitles[i] << "]" << endl;
+        if (completed[i]) cout << "  " << codexEntries[i] << endl;
+        else cout << "  [LOCKED - Clear Level " << i << " to decrypt this historical entry.]" << endl;
+    }
+    cout << "\n==============================================================\n" << endl;
 }
 
-// Level 3: Vigenere Keyword Cipher (polyalphabetic shift driven by a secret keyword)
-bool startLevel3(uint16_t &levelScore) {
-    cout << "\nStarting Level 3..." << endl;
-    const string &randomWord = words3[randomNo(0, 9)]; // Random word selection from words3
-    string dashes = "";                                // Uses a simple string instead of vector<bool>
-    createDashes(randomWord, dashes);                  // Generate random hidden positions for the puzzle board
-    string shiftedWord = randomWord;
-    vigenereEncrypt(shiftedWord, keys[randomNo(0, 9)]); // Encrypt using repeating keyword cipher
-    return playLevelLoop(randomWord, dashes, shiftedWord, 3, 5, levelScore);
-}
-
-// Level 4: XOR Byte Cipher + Hexadecimal Encoding (bitwise XOR displayed as clean hex pairs)
-bool startLevel4(uint16_t &levelScore) {
-    cout << "\nStarting Level 4..." << endl;
-    const string &randomWord = words4[randomNo(0, 9)]; // Random word selection from words4
-    string dashes = "";                                // Uses a simple string instead of vector<bool>
-    createDashes(randomWord, dashes);                  // Generate random hidden positions for the puzzle board
-    string shiftedWord = randomWord;
-    XOREncrypt(shiftedWord, keys[randomNo(0, 9)]);      // Encrypt the word using bitwise XOR
-    string hexOutput;
-    toHex(shiftedWord, hexOutput);                     // Convert raw XOR bytes to clean hexadecimal pairs
-    return playLevelLoop(randomWord, dashes, hexOutput, 4, 6, levelScore);
+// Shows the scoring rules and min/max points table
+void viewScoringSystem() {
+    cout << "\n====================================================================" << endl;
+    cout << "                      SCORING SYSTEM & RULES                        " << endl;
+    cout << "====================================================================" << endl;
+    cout << "  * Time Limit      : 90 seconds per level" << endl;
+    cout << "  * Lives           : 5 attempts per level" << endl;
+    cout << "  * First-Try Bonus : +2 points (solved with 0 wrong guesses)" << endl;
+    cout << "  * Miss Penalty    : -1 point per wrong guess" << endl;
+    cout << "  * Speed Bonuses   : +3 pts (<= 20s) | +2 pts (21-45s) | +0 (> 45s)" << endl;
+    cout << "  * Replay Rule     : Replaying a [CLEARED] level is Practice Mode" << endl;
+    cout << "                      (0 extra points added to total)" << endl;
+    cout << "--------------------------------------------------------------------" << endl;
+    cout << "  LEVEL     | BASE | 1ST TRY | SPEED | MIN (FAIL/WIN) | MAX TOTAL" << endl;
+    cout << "  ----------+------+---------+-------+----------------+----------" << endl;
+    cout << "  Level 1   |  +3  |   +2    |  +3   |   0 / 1 pt     |   8 pts" << endl;
+    cout << "  Level 2   |  +4  |   +2    |  +3   |   0 / 1 pt     |   9 pts" << endl;
+    cout << "  Level 3   |  +5  |   +2    |  +3   |   0 / 1 pt     |  10 pts" << endl;
+    cout << "  Level 4   |  +6  |   +2    |  +3   |   0 / 1 pt     |  11 pts" << endl;
+    cout << "  ----------+------+---------+-------+----------------+----------" << endl;
+    cout << "  FULL GAME |  18  |   +8    |  +12  |   0 / 4 pts    |  38 pts" << endl;
+    cout << "====================================================================\n" << endl;
 }
