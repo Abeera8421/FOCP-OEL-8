@@ -6,8 +6,13 @@
 #include <vector>
 #include <cstdint>
 #include "words.hpp"
+#include <windows.h>
 
 using namespace std;
+const string GREEN = "\033[32m";
+const string RED = "\033[31m";
+const string YELLOW = "\033[33m";
+const string RESET = "\033[0m";
 // Function prototypes
 char shiftChar(char c, int shift);
 int randomNo(int min, int max);
@@ -27,6 +32,7 @@ bool startLevel4(uint16_t &levelScore);
 
 int main()
 {
+    SetConsoleOutputCP(CP_UTF8);
     srand(time(0));     // Seed the random number generator
     uint8_t level = 1;  // Initialize level to 1, range 1-3
     uint16_t score = 0; // Initialize score to 0, range 1-10
@@ -124,7 +130,7 @@ void printLevel(const string &word, const vector<bool> &dashes, const string &sh
     {
         if (dashes[i])
         {
-            cout << "_ "; // Print underscore for hidden letters
+            cout << YELLOW << "_ " << RESET; // Print underscore for hidden letters
         }
         else
         {
@@ -153,13 +159,16 @@ void revealHint(const string &word, vector<bool> &dashes)
 
     cout << "No hidden letters left to reveal." << endl;
 }
-void takeStringInput(string &input)
+void takeStringInput(string &input, bool allowHint = false)
 {
-    cout << "Enter a string: ";
+    if (allowHint)
+        cout << "Enter your guess (or type HINT for a clue): ";
+    else
+        cout << "Enter your guess: ";
+
     cin.clear();
     getline(cin, input);
 }
-
 void encrypt2(string &input)
 {
     uint8_t randomShiftEven = randomNo(1, 25); // Random shift for even indexed characters
@@ -250,7 +259,7 @@ bool startLevel1(uint16_t &levelScore)
     printLevel(randomWord, dashes, shiftedWord, 1); // Print the initial state of the level
     while (input != randomWord && attempts < 5)     // Allow up to 3 attempts
     {
-        takeStringInput(input);
+        takeStringInput(input, false);
         if (!validateInput(input))
         {
             cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
@@ -258,17 +267,17 @@ bool startLevel1(uint16_t &levelScore)
         }
         if (input == randomWord)
         {
-            cout << "Congratulations! You've guessed the word correctly." << endl;
+           cout <<GREEN<< "Congratulations! You've guessed the word correctly." << RESET <<endl;
             break; // Exit the loop if the word is guessed correctly
         }
         else
         {
-            cout << "Incorrect guess. Try again." << endl;
+           cout << RED << "Incorrect guess!Try Again" << RESET << endl;
             attempts++; // Increment attempts for incorrect guesses
         }
     }
     levelScore += 3; // Random score for level 1
-    cout << "Level 1 completed with score: " << levelScore << endl;
+    cout << GREEN << "Level completed! with score: "<<levelScore << RESET << endl;
     return true; // Indicate level completion
 }
 
@@ -286,7 +295,7 @@ bool startLevel2(uint16_t &levelScore)
     printLevel(randomWord, dashes, shiftedWord, 2); // Print the initial state of the level
     while (input != randomWord && attempts < 5)     // Allow up to 3 attempts
     {
-        takeStringInput(input);
+       takeStringInput(input, false);
         if (!validateInput(input))
         {
             cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
@@ -294,17 +303,17 @@ bool startLevel2(uint16_t &levelScore)
         }
         if (input == randomWord)
         {
-            cout << "Congratulations! You've guessed the word correctly." << endl;
+            cout <<GREEN<< "Congratulations! You've guessed the word correctly." << RESET <<endl;
             break; // Exit the loop if the word is guessed correctly
         }
         else
         {
-            cout << "Incorrect guess. Try again." << endl;
+            cout << RED << "Incorrect guess!Try Again" << RESET << endl;
             attempts++; // Increment attempts for incorrect guesses
         }
     }
     levelScore += 4; // Random score for level 2
-    cout << "Level 2 completed with score: " << levelScore << endl;
+    cout <<GREEN<< "Level 2 completed with score: " << levelScore <<RESET<< endl;
     return true; // Indicate level completion
 }
 
@@ -313,6 +322,8 @@ bool startLevel3(uint16_t &levelScore)
     cout << endl;
     cout << "Starting Level 3..." << endl;
     size_t attempts = 0;                               // Initialize attempts to 0
+    size_t hintsUsed = 0;
+    const size_t maxHints = 2;
     const string &randomWord = words3[randomNo(0, 9)]; // Random word selection from words3
     const int wordLength = randomWord.length();
     vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
@@ -327,32 +338,41 @@ bool startLevel3(uint16_t &levelScore)
     string input = "";
     while (input != randomWord && attempts < 5) // Allow up to 3 attempts
     {
-        takeStringInput(input);
+        takeStringInput(input, true);
         if (input == "HINT" || input == "hint" || input == "Hint")
 {
-    revealHint(randomWord, dashes);
+    if (hintsUsed < maxHints)
+    {
+        revealHint(randomWord, dashes);
+        hintsUsed++;
+    }
+    else
+    {
+        cout << RED << "⚠ No hints remaining!" << RESET << endl;
+    }
+
     printLevel(randomWord, dashes, hexOutput, 3);
     input = "";
     continue;
 }
         if (!validateInput(input))
         {
-            cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
+            cout << YELLOW << "⚠ Invalid input. Please enter only alphabetic characters and spaces." << RESET << endl;
             continue; // Skip the rest of the loop and prompt for input again
         }
         if (input == randomWord)
         {
-            cout << "Congratulations! You've guessed the word correctly." << endl;
+            cout <<GREEN<< "Congratulations! You've guessed the word correctly." << RESET <<endl;
             break; // Exit the loop if the word is guessed correctly
         }
         else
         {
-            cout << "Incorrect guess. Try again." << endl;
+            cout << RED << "Incorrect guess!Try Again" << RESET << endl;
             attempts++; // Increment attempts for incorrect guesses
         }
     }
     levelScore += 5; // Random score for level 3
-    cout << "Level 3 completed with score: " << levelScore << endl;
+    cout << GREEN<<"Level 3 completed with score: " << levelScore <<RESET<< endl;
     return true; // Indicate level completion
 }
 
@@ -361,6 +381,8 @@ bool startLevel4(uint16_t &levelScore)
     cout << endl;
     cout << "Starting Level 4..." << endl;
     size_t attempts = 0;                               // Initialize attempts to 0
+    size_t hintsUsed = 0;
+    const size_t maxHints = 1;
     const string &randomWord = words3[randomNo(0, 9)]; // Random word selection from words4
     const int wordLength = randomWord.length();
     vector<bool> dashes(wordLength); // Array for dashes to represent the hidden word
@@ -374,36 +396,45 @@ bool startLevel4(uint16_t &levelScore)
     printLevel(randomWord, dashes, hexOutput, 4);// Print the initial state of the level
     while (input != randomWord && attempts < 5) // Allow up to 5 attempts
     {
-        takeStringInput(input);
-        if (input == "HINT" || input == "hint" || input == "Hint")
+        takeStringInput(input, true);
+       if (input == "HINT" || input == "hint" || input == "Hint")
 {
-    revealHint(randomWord, dashes);
+    if (hintsUsed < maxHints)
+    {
+        revealHint(randomWord, dashes);
+        hintsUsed++;
+    }
+    else
+    {
+        cout << RED << "⚠ No hints remaining!" << RESET << endl;
+    }
+
     printLevel(randomWord, dashes, hexOutput, 4);
     input = "";
     continue;
 }
         if (input.empty())
         {
-            cout << "Input cannot be empty. Please enter a valid guess." << endl;
+            cout << YELLOW << "⚠ Input cannot be empty. Please enter a valid guess." << RESET << endl;
             continue; // Skip the rest of the loop and prompt for input again
         }
         if (!validateInput(input))
         {
-            cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
+            cout << YELLOW << "⚠ Invalid input. Please enter only alphabetic characters and spaces." << RESET << endl;
             continue; // Skip the rest of the loop and prompt for input again
         }
         if (input == randomWord)
         {
-            cout << "Congratulations! You've guessed the word correctly." << endl;
+            cout <<GREEN<< "Congratulations! You've guessed the word correctly." << RESET <<endl;
             break; // Exit the loop if the word is guessed correctly
         }
         else
         {
-            cout << "Incorrect guess. Try again." << endl;
+            cout << RED << "Incorrect guess!Try Again" << RESET << endl;
             attempts++; // Increment attempts for incorrect guesses
         }
     }
     levelScore += 5; // Random score for level 4
-    cout << "Level 4 completed with score: " << levelScore << endl;
+    cout <<GREEN<< "Level 4 completed with score: " << levelScore <<RESET<< endl;
     return true; // Indicate level completion
 }
