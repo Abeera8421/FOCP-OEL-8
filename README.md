@@ -4,7 +4,7 @@
 
 # Cryptogram: Historical Codebreaker Edition (`FOCP-OEL-8`)
 
-**GitHub Repository:** [](https://github.com/Abeera8421/FOCP-OEL-8.git)
+**GitHub Repository:** [github.com/Abeera8421/FOCP-OEL-8](https://github.com/Abeera8421/FOCP-OEL-8.git)
 
 A modular, color-coded terminal C++ cryptography game where players step into the roles of historical codebreakers and modern cybersecurity analysts across four real-world eras—from Julius Caesar's campaigns in Gaul to the 2017 WannaCry cyberattack—cracking intercepted transmissions against a live ticking countdown timer to unlock declassified historical files.
 
