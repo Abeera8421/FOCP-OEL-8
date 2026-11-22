@@ -2,37 +2,44 @@
 #include <cstdlib>
 #include <ctime>
 #include "game.hpp"
+#include <windows.h>
 
 using namespace std;
-
+const string GREEN = "\033[32m";
+const string RED = "\033[31m";
+const string YELLOW = "\033[33m";
+const string CYAN = "\033[36m";
+const string RESET = "\033[0m";
 int main() {
     srand(time(0));
     int score = 0;
     bool completed[5] = {false};
 
-    cout << "\n==============================================================" << endl;
-    cout << "          CRYPTOGRAM: HISTORICAL CODEBREAKER EDITION          " << endl;
+    cout << "\n" << CYAN;
     cout << "==============================================================" << endl;
+    cout << "          CRYPTOGRAM: HISTORICAL CODEBREAKER EDITION          " << endl;
+    cout << "==============================================================" << RESET << endl;
 
     while (true) {
-        cout << "\n--------------------------------------------------------------" << endl;
-        cout << "  CURRENT TOTAL SCORE: " << score << endl;
-        cout << "--------------------------------------------------------------" << endl;
-        cout << "  1 - 54 BC Gaul       : Caesar Shift" << (completed[1] ? " [CLEARED]" : "") << endl;
-        cout << "  2 - May 1941 Atlantic: Dual-Rotor Enigma" << (completed[2] ? " [CLEARED]" : "") << endl;
-        cout << "  3 - July 1863 Civil War: Vigenere Keyword" << (completed[3] ? " [CLEARED]" : "") << endl;
-        cout << "  4 - May 2017 Global  : WannaCry Cyberattack (XOR-Hex + Atbash)" << (completed[4] ? " [CLEARED]" : "") << endl;
+        cout << "\n" << CYAN << "--------------------------------------------------------------" << RESET << endl;
+        cout << "  CURRENT TOTAL SCORE: " << GREEN << score << RESET << endl;
+        cout << CYAN << "--------------------------------------------------------------" << RESET << endl;
+        cout << YELLOW << "  1 - 54 BC Gaul       : Caesar Shift" << RESET << (completed[1] ? GREEN + " [CLEARED]" + RESET : "") << endl;
+        cout << YELLOW << "  2 - May 1941 Atlantic: Dual-Rotor Enigma" << RESET << (completed[2] ? GREEN + " [CLEARED]" + RESET : "") << endl;
+        cout << YELLOW << "  3 - July 1863 Civil War: Vigenere Keyword" << RESET << (completed[3] ? GREEN + " [CLEARED]" + RESET : "") << endl;
+        cout << YELLOW << "  4 - May 2017 Global  : WannaCry Cyberattack (XOR-Hex + Atbash)" << RESET << (completed[4] ? GREEN + " [CLEARED]" + RESET : "") << endl;
         cout << "  5 - View Declassified Codex Archive" << endl;
         cout << "  6 - View Scoring System" << endl;
-        cout << "  0 - Exit Game" << endl;
+        cout << RED << "  0 - Exit Game" << RESET << endl;
         cout << "--------------------------------------------------------------" << endl;
 
         int choice = 0;
         cout << "Choose an option (1-6) or 0 to exit: ";
-        while (!(cin >> choice) || choice < 0 || choice > 6) {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "Invalid choice. Enter 1-6 or 0 to exit: ";
+       while (!(cin >> choice) || choice < 0 || choice > 6) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << RED << "[!] Invalid choice. Enter 1-6 or 0 to exit: " << RESET;
+         }
         }
         cin.ignore(1000, '\n');
 
@@ -60,9 +67,10 @@ int main() {
         }
     }
 
-    cout << "\n==============================================================" << endl;
-    cout << "                 MISSION COMPLETE - GAME OVER                 " << endl;
-    cout << "                 FINAL TOTAL SCORE : " << score << endl;
-    cout << "==============================================================\n" << endl;
+   cout << "\n" << CYAN;
+cout << "==============================================================" << endl;
+cout << "                 MISSION COMPLETE - GAME OVER                 " << endl;
+cout << "                 FINAL TOTAL SCORE : " << GREEN << score << CYAN << endl;
+cout << "==============================================================" << RESET << "\n" << endl;
     return 0;
 }
