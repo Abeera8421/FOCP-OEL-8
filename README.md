@@ -142,7 +142,7 @@ In accordance with the Lab 08 guidelines on supplementary tools, AI assistance (
   * Rewrote `createDashes()` to preserve spaces in multi-word phrases and added the linear scoring formula (`Base = Level + 2`), speed/first-try bonuses, miss penalties, **Scoring System Table** (Option `6`), and Practice Mode.
   * Built the 90-second live background countdown timer (`std::thread` + ANSI cursor control) and the reverse-Atbash technique in Level 4's dual-clue **XOR Hex + Reversed Atbash** cipher.
   * Ensured cross-platform macOS/Windows compilation, authored the project `README.md` and documentation.
-
+  * Performed cross-platform testing, debugging, and final submission verification.
 ---
 
 ## License
