@@ -126,23 +126,25 @@ In accordance with the Lab 08 guidelines on supplementary tools, AI assistance (
 
 ## Individual Team Contributions
 
-* **Abdullah Anwar (`@teammate2-github-username`):**
-  * Architected the foundational C++ codebase from scratch, including the main menu loop, level selection flow, and replay state tracking.
-  * Implemented the core encryption and encoding engines (`shiftChar`, `encrypt2`, `vigenereEncrypt`, `XOREncrypt`, and `toHex`).
-  * Built the puzzle generation logic (`randomNo`, `getOmittedIndexes`, `createDashes`) and the formatted board renderer (`printLevel`).
-  * Developed the guess-checking loop, attempt limits and strict input sanitization (`validateInput`).
-  * * Managed Git branches and pull requests and performed cross-platform testing, debugging, and final submission verification.
+* **Abdullah Anwar (`@Abdullah860259`):**
+  * Created the initial project files (`main.cpp` and `words.hpp`) to establish the foundational C++ codebase, including the main menu loop, level selection flow, and replay state tracking.
+  * Structured the initial single-word banks (`words1`–`words3`) and secret encryption keyword arrays (`keys`) inside `words.hpp`.
+  * Built the initial puzzle generation logic (`randomNo`, `getOmittedIndexes`, `createDashes`) and formatted board renderer (`printLevel`).
+  * Implemented the encryption and encoding engines (`encrypt2`, `vigenereEncrypt`, `XOREncrypt`, `toHex`, and `toChar`).
+  * Developed the guess-checking loop, input prompt helper (`takeStringInput`), attempt limits, and input sanitization (`validateInput`).
+  * Managed Git branches and pull requests and performed cross-platform testing, debugging, and final submission verification.
 
-* **Hooria Mansoor (`@teammate3-github-username`):**
+* **Hooria Mansoor (`@hooriamansoorahmed-lgtm`):**
+  * Implemented the Level 1 **Caesar Shift** encryption logic (`shiftChar`).
   * Designed and implemented the **ANSI terminal color palette** (`GREEN`, `RED`, `YELLOW`, `RESET`) and the interactive **`HINT` lifeline** (`revealHint`).
 
-* **Abeera Ahsan (`@your-github-username`):**
+* **Abeera Ahsan (`@Abeera8421`):**
   * Refactored the codebase into modular files (`game.hpp`, `game.cpp`, `words.hpp`) and consolidated duplicate level loops into `startLevel()`.
-  * Designed and implemented the 4 historical eras, telegraphic phrase banks, true-event mission briefings, and the **Declassified Codex Archive** (Option `5`).
+  * Added the Level 4 array (`words4`) and transformed all four word banks (`words1`–`words4`) into historically themed multi-word phrase banks, alongside the 4 historical eras, true-event mission briefings, and the **Declassified Codex Archive** (Option `5`).
   * Rewrote `createDashes()` to preserve spaces in multi-word phrases and added the linear scoring formula (`Base = Level + 2`), speed/first-try bonuses, miss penalties, **Scoring System Table** (Option `6`), and Practice Mode.
-  * Built the 90-second live background countdown timer (`std::thread` + ANSI cursor control) and the reverse-Atbash technique in Level 4's dual-clue **XOR Hex + Reversed Atbash** cipher.
-  * Ensured cross-platform macOS/Windows compilation, authored the project `README.md` and documentation.
-  * Performed cross-platform testing, debugging, and final submission verification.
+  * Built the 90-second live background countdown timer (`std::thread` + ANSI cursor control) and implemented the **Reversed Atbash** mirror cipher (`reversedAtbash`) to power Level 4's dual-clue **XOR Hex + Reversed Atbash** challenge.
+  * Ensured cross-platform macOS/Windows compilation, authored the project `README.md` and documentation, and performed final testing and debugging.
+
 ---
 
 ## License
