@@ -2,7 +2,10 @@
 #include <cstdlib>
 #include <ctime>
 #include "game.hpp"
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
 
 using namespace std;
 const string GREEN = "\033[32m";
